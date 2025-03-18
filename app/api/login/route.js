@@ -15,7 +15,8 @@ export async function POST(request) {
     const body = await request.json();
 
     // Forward the credentials to the Spring Boot backend
-    const backendResponse = await fetch(process.env.BACKEND_LOGIN_URL, {
+    // process.env.BACKEND_LOGIN_URL
+    const backendResponse = await fetch("http://localhost:8080/api/v1/auth/signin", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
