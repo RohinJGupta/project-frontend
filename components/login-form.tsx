@@ -1,3 +1,4 @@
+"use client";
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -16,21 +17,20 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
+    setError(null);
 
     try {
       const response = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: email, password }),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
@@ -38,10 +38,9 @@ export function LoginForm({
         // The JWT is now stored in an HTTPOnly cookie.
         router.push("/dashboard");
       } else {
-        setError(data.error || "Login failed");
-      }
+        setError(typeof data.error === 'string' ?  "The login information you entered is incorrect. Please try again or sign up." : data.error);
+      } 
     } catch (err) {
-      console.error(err);
       setError("An error occurred. Please try again.");
     }
   }
@@ -56,7 +55,7 @@ export function LoginForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form onSubmit={handleSubmit}>
             <div className="grid gap-6">
               <div className="flex flex-col gap-4">
                 <Button variant="outline" className="w-full">
@@ -91,6 +90,8 @@ export function LoginForm({
                     type="email"
                     placeholder="m@example.com"
                     required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
                 <div className="grid gap-3">
@@ -103,8 +104,19 @@ export function LoginForm({
                       Forgot your password?
                     </a>
                   </div>
-                  <Input id="password" type="password" required />
+                  <Input 
+                    id="password" 
+                    type="password" 
+                    required 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
                 </div>
+                {error && (
+                  <div className="rounded-md border border-destructive bg-destructive-100/80 p-4 text-sm text-black opacity-90">
+                    {error}
+                  </div>
+                )}
                 <Button type="submit" className="w-full">
                   Login
                 </Button>
